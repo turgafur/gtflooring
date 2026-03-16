@@ -1,0 +1,133 @@
+:root {
+  --bg: #f6f0e6;
+  --panel: #fffaf2;
+  --border: #e3d6c6;
+  --text: #1f1a14;
+  --muted: #6b5f54;
+  --primary: #9a6b2f;
+  --primaryHover: #7f5626;
+  --shadow: 0 10px 24px rgba(31, 26, 20, 0.08);
+  --radius: 14px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* Layout */
+header,
+nav,
+main,
+footer {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+header {
+  text-align: center;
+}
+
+.site-logo {
+  width: 150px;
+  margin-bottom: 10px;
+}
+
+/* Navigation */
+nav ul {
+  list-style: none;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+nav a {
+  text-decoration: none;
+  color: var(--text);
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 999px;
+  transition: background .2s;
+}
+
+nav a:hover {
+  background: #fbf3e9;
+}
+
+nav a.current {
+  background: #f1e2cf;
+}
+
+/* Sections */
+.section,
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-top: 20px;
+}
+
+/* Buttons */
+.btn,
+button {
+  background: var(--primary);
+  color: white;
+  padding: 10px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:hover,
+button:hover {
+  background: var(--primaryHover);
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media(min-width: 768px) {
+  .grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.small {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  color: var(--muted);
+  padding-bottom: 30px;
+}

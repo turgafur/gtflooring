@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GT Flooring Inc | Calculator</title>
+    <meta name="description"
+        content="Estimate flooring material + installation cost for carpet, laminate, LVP, LVT, or hardwood. Add complexity, removal, and quality options." />
+    <link rel="stylesheet" href="styles.css" />
+
+    <style>
+        /* ========================== Light Beige Theme Upgrade ========================== */
+        :root {
+            --bg: #f6f0e6;
+            --panel: #fffaf2;
+            --border: #e3d6c6;
+            --text: #1f1a14;
+            --muted: #6b5f54;
+            --primary: #9a6b2f;
+            --primaryHover: #7f5626;
+            --chipBg: #f1e2cf;
+            --chipRing: rgba(154, 107, 47, 0.35);
+            --pillBg: #efe0cd;
+            --shadow: 0 10px 24px rgba(31, 26, 20, 0.08);
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            line-height: 1.5;
+        }
+
+        .calc-wrap {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 24px 16px;
+        }
+
+        .calc-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: 1fr;
+        }
+
+        @media (min-width: 860px) {
+            .calc-grid {
+                grid-template-columns: 1.15fr 0.85fr;
+            }
+        }
+
+        .panel {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--panel);
+            padding: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        .panel h2 {
+            margin: 0 0 10px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        @media (min-width: 560px) {
+            .row {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        label {
+            font-weight: 650;
+            display: block;
+            margin: 10px 0 6px;
+            color: var(--text);
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--text);
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: rgba(154, 107, 47, 0.55);
+            box-shadow: 0 0 0 3px rgba(154, 107, 47, 0.18);
+        }
+
+        .radios {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .radio {
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 8px 12px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: #fff;
+            cursor: pointer;
+            transition: background .2s, border-color .2s, box-shadow .2s, transform .15s;
+        }
+
+        .radio input[type="radio"] {
+            accent-color: var(--primary);
+        }
+
+        .radio:has(input:checked) {
+            background: var(--chipBg);
+            border-color: rgba(154, 107, 47, 0.45);
+            box-shadow: 0 0 0 3px rgba(154, 107, 47, 0.15);
+        }
+
+        .radio:hover {
+            transform: translateY(-1px);
+        }
+
+        .toggle {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btns {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .25s, box-shadow .25s, transform .15s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 10px 22px rgba(154, 107, 47, 0.18);
+        }
+
+        .btn-primary:hover {
+            background: var(--primaryHover);
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: #fff;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            background: #fbf3e9;
+            transform: translateY(-1px);
+        }
+
+        .small {
+            font-size: 0.92rem;
+            color: var(--muted);
+            opacity: 1;
+        }
+
+        .muted {
+            color: var(--muted);
+            opacity: 1;
+        }
+
+        .results {
+            background: #fbf5ec;
+        }
+
+        .line {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(154, 107, 47, 0.25);
+        }
+
+        .line:last-child {
+            border-bottom: 0;
+        }
+
+        .total {
+            font-size: 1.2rem;
+            font-weight: 800;
+            padding-top: 10px;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: var(--pillBg);
+            margin-left: 8px;
+            font-size: 0.85rem;
+            color: var(--primaryHover);
+            border: 1px solid rgba(154, 107, 47, 0.25);
+        }
+
+        @media print {
+
+            nav,
+            footer,
+            .btns,
+            .print-hide {
+                display: none !important;
+            }
+
+            body {
+                background: #fff;
+            }
+
+            .panel {
+                border: 1px solid #000;
+                box-shadow: none;
+                background: #fff;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <img src="assets/logo.png" alt="GT Flooring Inc company logo" class="site-logo" loading="lazy">
+        <h1>Flooring Cost Calculator</h1>
+        <p class="small">Fast estimate for materials + installation</p>
+    </header>
+
+    <nav aria-label="Primary Navigation">
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="calculator.html" class="current" aria-current="page">Calculator</a></li>
+        </ul>
+    </nav>
+
+    <main class="calc-wrap">
+        <section class="calc-grid">
+
+            <!-- Inputs -->
+            <div class="panel">
+                <h2>Project Inputs</h2>
+                <p class="small muted">Enter room size, pick complexity, flooring type, and optional removal/quality.
+                </p>
+
+                <div class="row">
+                    <div>
+                        <label for="widthFt">Width (ft)</label>
+                        <input id="widthFt" type="number" min="0" step="0.1" placeholder="e.g., 12" />
+                    </div>
+                    <div>
+                        <label for="lengthFt">Length (ft)</label>
+                        <input id="lengthFt" type="number" min="0" step="0.1" placeholder="e.g., 14" />
+                    </div>
+                </div>
+
+                <label>Room Complexity</label>
+                <div class="radios" role="radiogroup" aria-label="Room complexity">
+                    <label class="radio"><input type="radio" name="complexity" value="simple" checked> Simple</label>
+                    <label class="radio"><input type="radio" name="complexity" value="standard"> Standard</label>
+                    <label class="radio"><input type="radio" name="complexity" value="complex"> Complex</label>
+                </div>
+
+                <label for="floorType">Select Flooring Type</label>
+                <select id="floorType">
+                    <option value="carpet">Carpet</option>
+                    <option value="laminate">Laminate</option>
+                    <option value="lvp">Vinyl Plank (LVP)</option>
+                    <option value="lvt">Vinyl Tile (LVT)</option>
+                    <option value="hardwood">Engineered Hardwood</option>
+                </select>
+
+                <div class="toggle">
+                    <input id="removalToggle" type="checkbox" />
+                    <label for="removalToggle" style="margin:0; font-weight:700;">Need removal of existing
+                        flooring?</label>
+                </div>
+
+                <div id="removalBlock" class="print-hide" style="display:none;">
+                    <label for="removeType">Select material to remove</label>
+                    <select id="removeType">
+                        <option value="none">— Select —</option>
+                        <option value="carpet">Carpet</option>
+                        <option value="laminate">Laminate</option>
+                        <option value="hardwood">Hardwood</option>
+                        <option value="tile">Tile</option>
+                        <option value="vinyl">Vinyl (sheet/plank/tile)</option>
+                    </select>
+                </div>
+
+                <div class="toggle">
+                    <input id="qualityToggle" type="checkbox" checked />
+                    <label for="qualityToggle" style="margin:0; font-weight:700;">Include material quality
+                        selection?</label>
+                </div>
+
+                <div id="qualityBlock">
+                    <label for="quality">Select Material Quality</label>
+                    <select id="quality">
+                        <option value="value">Value</option>
+                        <option value="balanced" selected>Balanced</option>
+                        <option value="premium">Premium</option>
+                    </select>
+                </div>
+
+                <div class="btns">
+                    <button class="btn-primary" type="button" id="calcBtn">Estimate Cost</button>
+                    <button class="btn-ghost" type="button" id="resetBtn">Reset</button>
+                    <button class="btn-ghost" type="button" id="pdfBtn">Save as PDF</button>
+                </div>
+
+                <p class="small muted">
+                    This is an estimate. Final pricing depends on site conditions, subfloor, stairs, trims, and product
+                    choice.
+                </p>
+            </div>
+
+            <!-- Results -->
+            <aside class="panel results" aria-live="polite">
+                <h2>Estimate</h2>
+                <p class="small muted" id="summaryLine">Enter your room size to calculate.</p>
+
+                <div id="resultBox" style="display:none;">
+                    <div class="line"><span>Area</span><span><strong id="areaOut">0</strong> sq.ft</span></div>
+                    <div class="line"><span>Waste allowance <span class="pill" id="wastePct">10%</span></span>
+                        <span><strong id="wasteOut">0</strong> sq.ft</span>
+                    </div>
+                    <div class="line"><span>Material needed</span><span><strong id="needOut">0</strong> sq.ft</span>
+                    </div>
+
+                    <hr style="border:0;border-top:1px solid rgba(154,107,47,0.25);margin:14px 0;">
+
+                    <div class="line"><span>Material cost</span><span>$<strong id="matCostOut">0</strong></span></div>
+                    <div class="line"><span>Install labor</span><span>$<strong id="labCostOut">0</strong></span></div>
+                    <div class="line" id="removalLine" style="display:none;">
+                        <span>Removal</span><span>$<strong id="remCostOut">0</strong></span>
+                    </div>
+
+                    <div class="line total"><span>Total estimate</span><span>$<strong id="totalOut">0</strong></span>
+                    </div>
+
+                    <p class="small muted" id="rateNote"></p>
+                </div>
+            </aside>
+
+        </section>
+    </main>
+
+    <footer>
+        <p><a href="index.html">Back to Home</a></p>
+        <p>© 2026 GT Flooring Inc</p>
+    </footer>
+
+    <script>
+        console.log("Calculator script loaded ✅");
+
+        // ---- Simple pricing model (editable) ----
+        const PRICING = {
+            carpet: { install: 2.25, material: { value: 2.50, balanced: 3.25, premium: 4.25 }, waste: 0.10 },
+            laminate: { install: 2.75, material: { value: 2.25, balanced: 3.25, premium: 4.25 }, waste: 0.10 },
+            lvp: { install: 2.75, material: { value: 2.75, balanced: 3.75, premium: 4.75 }, waste: 0.10 },
+            lvt: { install: 3.25, material: { value: 3.25, balanced: 4.25, premium: 5.25 }, waste: 0.10 },
+            hardwood: { install: 4.25, material: { value: 4.25, balanced: 5.25, premium: 6.25 }, waste: 0.12 }
+        };
+
+        const REMOVAL = {
+            carpet: 0.75,
+            laminate: 0.90,
+            hardwood: 1.25,
+            tile: 2.25,
+            vinyl: 1.10
+        };
+
+        const COMPLEXITY_MULT = {
+            simple: 1.00,
+            standard: 1.12,
+            complex: 1.25
+        };
+
+        // ---- Helpers ----
+        const $ = (id) => document.getElementById(id);
+        const money = (n) => (Math.round(n * 100) / 100).toFixed(2);
+
+        function getComplexity() {
+            const el = document.querySelector('input[name="complexity"]:checked');
+            return el ? el.value : "simple";
+        }
+
+        function readInputs() {
+            const width = parseFloat($("widthFt").value);
+            const length = parseFloat($("lengthFt").value);
+
+            return {
+                width,
+                length,
+                floorType: $("floorType").value,
+                complexity: getComplexity(),
+                removalOn: $("removalToggle").checked,
+                removeType: $("removeType").value,
+                qualityOn: $("qualityToggle").checked,
+                quality: $("quality").value
+            };
+        }
+
+        function calculate() {
+            const input = readInputs();
+
+            if (!input.width || !input.length || input.width <= 0 || input.length <= 0) {
+                $("summaryLine").textContent = "Please enter valid width and length (feet).";
+                $("resultBox").style.display = "none";
+                return;
+            }
+
+            const area = input.width * input.length;
+
+            const cfg = PRICING[input.floorType];
+            const wasteRate = cfg.waste;
+            const waste = area * wasteRate;
+            const needed = area + waste;
+
+            const complexityMult = COMPLEXITY_MULT[input.complexity] || 1;
+
+            // Material price (per sq.ft)
+            const qualityKey = input.qualityOn ? input.quality : "balanced";
+            const matRate = cfg.material[qualityKey];
+
+            // Install price (per sq.ft) with complexity multiplier
+            const installRate = cfg.install * complexityMult;
+
+            const materialCost = needed * matRate;
+            const laborCost = needed * installRate;
+
+            // Removal (optional)
+            let removalCost = 0;
+            const showRemoval = input.removalOn && input.removeType && input.removeType !== "none";
+            if (showRemoval) {
+                removalCost = needed * (REMOVAL[input.removeType] || 0);
+            }
+
+            const total = materialCost + laborCost + removalCost;
+
+            // ---- Output ----
+            $("summaryLine").textContent =
+                `Based on ${money(area)} sq.ft (${input.width}ft × ${input.length}ft) — ${input.floorType.toUpperCase()} · ${input.complexity}`;
+
+            $("resultBox").style.display = "block";
+            $("areaOut").textContent = money(area);
+            $("wastePct").textContent = Math.round(wasteRate * 100) + "%";
+            $("wasteOut").textContent = money(waste);
+            $("needOut").textContent = money(needed);
+
+            $("matCostOut").textContent = money(materialCost);
+            $("labCostOut").textContent = money(laborCost);
+
+            if (showRemoval) {
+                $("removalLine").style.display = "flex";
+                $("remCostOut").textContent = money(removalCost);
+            } else {
+                $("removalLine").style.display = "none";
+                $("remCostOut").textContent = "0.00";
+            }
+
+            $("totalOut").textContent = money(total);
+
+            const qualityLabel = input.qualityOn ? input.quality : "default";
+            $("rateNote").textContent =
+                `Rates used (editable): material $${money(matRate)}/sq.ft (${qualityLabel}), install $${money(installRate)}/sq.ft (complexity).`;
+        }
+
+        function resetForm() {
+            $("widthFt").value = "";
+            $("lengthFt").value = "";
+            document.querySelector('input[name="complexity"][value="simple"]').checked = true;
+
+            $("floorType").value = "carpet";
+            $("removalToggle").checked = false;
+            $("removeType").value = "none";
+            $("removalBlock").style.display = "none";
+
+            $("qualityToggle").checked = true;
+            $("quality").value = "balanced";
+            $("qualityBlock").style.display = "block";
+
+            $("summaryLine").textContent = "Enter your room size to calculate.";
+            $("resultBox").style.display = "none";
+        }
+
+        // ---- Wire up UI ----
+        $("calcBtn").addEventListener("click", calculate);
+        $("resetBtn").addEventListener("click", resetForm);
+        $("pdfBtn").addEventListener("click", () => window.print());
+
+        $("removalToggle").addEventListener("change", (e) => {
+            $("removalBlock").style.display = e.target.checked ? "block" : "none";
+            if (!e.target.checked) $("removeType").value = "none";
+        });
+
+        $("qualityToggle").addEventListener("change", (e) => {
+            $("qualityBlock").style.display = e.target.checked ? "block" : "none";
+        });
+
+        ["widthFt", "lengthFt"].forEach(id => {
+            $(id).addEventListener("keydown", (e) => {
+                if (e.key === "Enter") calculate();
+            });
+        });
+    </script>
+</body>
+
+</html>
