@@ -82,7 +82,7 @@
             color: var(--text);
         }
 
-        input,
+        input[type="number"],
         select {
             width: 100%;
             padding: 10px;
@@ -94,7 +94,7 @@
             box-sizing: border-box;
         }
 
-        input:focus,
+        input[type="number"]:focus,
         select:focus {
             border-color: rgba(154, 107, 47, 0.55);
             box-shadow: 0 0 0 3px rgba(154, 107, 47, 0.18);
@@ -158,13 +158,13 @@
         }
 
         .btn-primary {
-            background: var(--primary);
+            background: var(--primaryHover);
             color: #fff;
             box-shadow: 0 10px 22px rgba(154, 107, 47, 0.18);
         }
 
         .btn-primary:hover {
-            background: var(--primaryHover);
+            background: #65431e;
             transform: translateY(-1px);
         }
 
@@ -265,19 +265,19 @@
         <section class="calc-grid">
 
             <!-- Inputs -->
-            <div class="panel">
+            <form class="panel" id="estimateForm" novalidate>
                 <h2>Project Inputs</h2>
-                <p class="small muted">Enter room size, pick complexity, flooring type, and optional removal/quality.
+                <p class="small muted">Enter the dimensions of one rectangular room and choose the flooring and removal options.
                 </p>
 
                 <div class="row">
                     <div>
                         <label for="widthFt">Width (ft)</label>
-                        <input id="widthFt" type="number" min="0" step="0.1" placeholder="e.g., 12" />
+                        <input id="widthFt" type="number" min="0" step="any" required placeholder="e.g., 12" />
                     </div>
                     <div>
                         <label for="lengthFt">Length (ft)</label>
-                        <input id="lengthFt" type="number" min="0" step="0.1" placeholder="e.g., 14" />
+                        <input id="lengthFt" type="number" min="0" step="any" required placeholder="e.g., 14" />
                     </div>
                 </div>
 
@@ -287,6 +287,8 @@
                     <label class="radio"><input type="radio" name="complexity" value="standard"> Standard</label>
                     <label class="radio"><input type="radio" name="complexity" value="complex"> Complex</label>
                 </div>
+
+                <p class="small">Choose Simple for an open rectangle, Standard for some extra cuts, or Complex for several angles or obstacles.</p>
 
                 <label for="floorType">Select Flooring Type</label>
                 <select id="floorType">
@@ -315,13 +317,7 @@
                     </select>
                 </div>
 
-                <div class="toggle">
-                    <input id="qualityToggle" type="checkbox" checked />
-                    <label for="qualityToggle" style="margin:0; font-weight:700;">Include material quality
-                        selection?</label>
-                </div>
-
-                <div id="qualityBlock">
+                <div>
                     <label for="quality">Select Material Quality</label>
                     <select id="quality">
                         <option value="value">Value</option>
@@ -331,16 +327,16 @@
                 </div>
 
                 <div class="btns">
-                    <button class="btn-primary" type="button" id="calcBtn">Estimate Cost</button>
+                    <button class="btn-primary" type="submit">Estimate Cost</button>
                     <button class="btn-ghost" type="button" id="resetBtn">Reset</button>
-                    <button class="btn-ghost" type="button" id="pdfBtn">Save as PDF</button>
+                    <button class="btn-ghost" type="button" id="pdfBtn" disabled>Print / Save as PDF</button>
                 </div>
 
                 <p class="small muted">
-                    This is an estimate. Final pricing depends on site conditions, subfloor, stairs, trims, and product
-                    choice.
+                    This estimate covers flooring material, installation, and selected removal. Ask for a quote for stairs,
+                    subfloor preparation, trims, and site-specific work.
                 </p>
-            </div>
+            </form>
 
             <!-- Results -->
             <aside class="panel results" aria-live="polite">
@@ -358,15 +354,16 @@
                     <hr style="border:0;border-top:1px solid rgba(154,107,47,0.25);margin:14px 0;">
 
                     <div class="line"><span>Material cost</span><span>$<strong id="matCostOut">0</strong></span></div>
-                    <div class="line"><span>Install labor</span><span>$<strong id="labCostOut">0</strong></span></div>
+                    <div class="line"><span>Installation labour</span><span>$<strong id="labCostOut">0</strong></span></div>
                     <div class="line" id="removalLine" style="display:none;">
-                        <span>Removal</span><span>$<strong id="remCostOut">0</strong></span>
+                        <span id="removalLabel">Removal</span><span>$<strong id="remCostOut">0</strong></span>
                     </div>
 
-                    <div class="line total"><span>Total estimate</span><span>$<strong id="totalOut">0</strong></span>
+                    <div class="line total"><span>Estimated subtotal (CAD, before tax)</span><span>$<strong id="totalOut">0</strong></span>
                     </div>
 
                     <p class="small muted" id="rateNote"></p>
+                    <a class="btn print-hide" href="contact.html">Request a Quote</a>
                 </div>
             </aside>
 
@@ -379,8 +376,6 @@
     </footer>
 
     <script>
-        console.log("Calculator script loaded ✅");
-
         // ---- Simple pricing model (editable) ----
         const PRICING = {
             carpet: { install: 2.25, material: { value: 2.50, balanced: 3.25, premium: 4.25 }, waste: 0.10 },
@@ -424,7 +419,6 @@
                 complexity: getComplexity(),
                 removalOn: $("removalToggle").checked,
                 removeType: $("removeType").value,
-                qualityOn: $("qualityToggle").checked,
                 quality: $("quality").value
             };
         }
@@ -432,9 +426,19 @@
         function calculate() {
             const input = readInputs();
 
-            if (!input.width || !input.length || input.width <= 0 || input.length <= 0) {
-                $("summaryLine").textContent = "Please enter valid width and length (feet).";
-                $("resultBox").style.display = "none";
+            if (!Number.isFinite(input.width) || input.width <= 0) {
+                clearEstimate("Enter a width greater than zero (feet).");
+                $("widthFt").focus();
+                return;
+            }
+            if (!Number.isFinite(input.length) || input.length <= 0) {
+                clearEstimate("Enter a length greater than zero (feet).");
+                $("lengthFt").focus();
+                return;
+            }
+            if (input.removalOn && input.removeType === "none") {
+                clearEstimate("Select the flooring material to remove.");
+                $("removeType").focus();
                 return;
             }
 
@@ -448,27 +452,30 @@
             const complexityMult = COMPLEXITY_MULT[input.complexity] || 1;
 
             // Material price (per sq.ft)
-            const qualityKey = input.qualityOn ? input.quality : "balanced";
-            const matRate = cfg.material[qualityKey];
+            const matRate = cfg.material[input.quality];
 
             // Install price (per sq.ft) with complexity multiplier
             const installRate = cfg.install * complexityMult;
 
             const materialCost = needed * matRate;
-            const laborCost = needed * installRate;
+            const laborCost = area * installRate;
 
             // Removal (optional)
             let removalCost = 0;
-            const showRemoval = input.removalOn && input.removeType && input.removeType !== "none";
+            const showRemoval = input.removalOn;
             if (showRemoval) {
-                removalCost = needed * (REMOVAL[input.removeType] || 0);
+                removalCost = area * REMOVAL[input.removeType];
             }
 
             const total = materialCost + laborCost + removalCost;
+            if (!Number.isFinite(total * 100)) {
+                clearEstimate("Enter smaller room dimensions to calculate an estimate.");
+                return;
+            }
 
             // ---- Output ----
             $("summaryLine").textContent =
-                `Based on ${money(area)} sq.ft (${input.width}ft × ${input.length}ft) — ${input.floorType.toUpperCase()} · ${input.complexity}`;
+                `Based on ${money(area)} sq.ft (${input.width}ft × ${input.length}ft) — ${$("floorType").selectedOptions[0].textContent} · ${input.complexity}`;
 
             $("resultBox").style.display = "block";
             $("areaOut").textContent = money(area);
@@ -481,6 +488,7 @@
 
             if (showRemoval) {
                 $("removalLine").style.display = "flex";
+                $("removalLabel").textContent = `Removal (${$("removeType").selectedOptions[0].textContent})`;
                 $("remCostOut").textContent = money(removalCost);
             } else {
                 $("removalLine").style.display = "none";
@@ -489,9 +497,9 @@
 
             $("totalOut").textContent = money(total);
 
-            const qualityLabel = input.qualityOn ? input.quality : "default";
             $("rateNote").textContent =
-                `Rates used (editable): material $${money(matRate)}/sq.ft (${qualityLabel}), install $${money(installRate)}/sq.ft (complexity).`;
+                `Material ${money(matRate)}/ft² (${input.quality}, including waste). Installation ${money(installRate)}/ft² of measured area.`;
+            $("pdfBtn").disabled = false;
         }
 
         function resetForm() {
@@ -504,16 +512,24 @@
             $("removeType").value = "none";
             $("removalBlock").style.display = "none";
 
-            $("qualityToggle").checked = true;
             $("quality").value = "balanced";
-            $("qualityBlock").style.display = "block";
-
-            $("summaryLine").textContent = "Enter your room size to calculate.";
-            $("resultBox").style.display = "none";
+            clearEstimate("Enter your room size to calculate.");
         }
 
-        // ---- Wire up UI ----
-        $("calcBtn").addEventListener("click", calculate);
+        function clearEstimate(message) {
+            $("summaryLine").textContent = message;
+            $("resultBox").style.display = "none";
+            $("pdfBtn").disabled = true;
+        }
+
+        const form = $("estimateForm");
+        form.addEventListener("submit", (event) => {
+            event.preventDefault();
+            calculate();
+        });
+        form.addEventListener("input", () => {
+            clearEstimate("Inputs changed. Select Estimate Cost to update your estimate.");
+        });
         $("resetBtn").addEventListener("click", resetForm);
         $("pdfBtn").addEventListener("click", () => window.print());
 
@@ -522,15 +538,6 @@
             if (!e.target.checked) $("removeType").value = "none";
         });
 
-        $("qualityToggle").addEventListener("change", (e) => {
-            $("qualityBlock").style.display = e.target.checked ? "block" : "none";
-        });
-
-        ["widthFt", "lengthFt"].forEach(id => {
-            $(id).addEventListener("keydown", (e) => {
-                if (e.key === "Enter") calculate();
-            });
-        });
     </script>
 </body>
 
