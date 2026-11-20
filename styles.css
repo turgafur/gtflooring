@@ -47,7 +47,8 @@ nav ul {
   padding: 10px;
   display: flex;
   justify-content: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 6px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -55,6 +56,7 @@ nav ul {
 }
 
 nav a {
+  display: block;
   text-decoration: none;
   color: var(--text);
   font-weight: 700;
@@ -83,9 +85,16 @@ nav a.current {
 }
 
 /* Buttons */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .btn,
 button {
-  background: var(--primary);
+  display: inline-block;
+  background: var(--primaryHover);
   color: white;
   padding: 10px 16px;
   border-radius: 10px;
@@ -97,7 +106,12 @@ button {
 
 .btn:hover,
 button:hover {
-  background: var(--primaryHover);
+  background: #65431e;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 /* Grid */
